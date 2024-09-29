@@ -28,14 +28,25 @@ namespace AsyncBreakfast
 
             Juice oj = PourOJ();
             Console.WriteLine("oj is ready");
-            await eggsTask;
-            Console.WriteLine("eggs are ready");
-            await baconTask;
-            Console.WriteLine("bacon is ready");
-            var toast= await toastTask;
-            ApplyButter(toast);
-            ApplyJam(toast);
-            Console.WriteLine("toast is ready");
+            var breakfastTasks = new List<Task> { eggsTask, baconTask, toastTask };
+            while (breakfastTasks.Count > 0)
+            {
+                Task finishedTask = await Task.WhenAny(breakfastTasks);
+                if (finishedTask == eggsTask)
+                {
+                    Console.WriteLine("eggs are ready");
+                }
+                else if (finishedTask == baconTask)
+                {
+                    Console.WriteLine("bacon is ready");
+                }
+                else if (finishedTask == toastTask)
+                {
+                    Console.WriteLine("toast is ready");
+                }
+                await finishedTask;
+                breakfastTasks.Remove(finishedTask);
+            }
             Console.WriteLine($"Breakfast is ready!{DateTime.Now}");
         }
 
@@ -60,7 +71,7 @@ namespace AsyncBreakfast
             Console.WriteLine("Start toasting...");
             await Task.Delay(3000);
             Console.WriteLine("Remove toast from toaster");
-
+          
             return new Toast();
         }
 
